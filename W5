@@ -1,0 +1,89 @@
+/*1. Rotate image by 45 degrees without cropping the sides of the image.*/
+import cv2
+import imutils
+
+img = cv2.imread('lena.jfif')
+rotated = imutils.rotate_bound(img, 45)
+
+cv2.imshow('Rotated', rotated)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+/1.Second way/
+img = cv2.imread('lena.jfif')
+h, w = img.shape[:2]
+
+# Calculate new image size
+diagonal = int(np.sqrt(h**2 + w**2))
+new_h, new_w = diagonal, diagonal
+
+# Create rotation matrix
+M = cv2.getRotationMatrix2D((w/2, h/2), 45, 1)
+
+# Adjust matrix translation component
+M[0,2] += (new_w - w) / 2
+M[1,2] += (new_h - h) / 2
+
+rotated = cv2.warpAffine(img, M, (new_w, new_h))
+
+cv2.imshow('Rotated', rotated)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+--------------------------------------
+2. Overlay 
+
+import cv2
+import numpy as np
+
+flower = cv2.imread('flower.jfif')
+bee = cv2.imread('native-bee.png')
+
+# Resize flower to match bee image size
+flower = cv2.resize(flower, (bee.shape[1], bee.shape[0]))
+
+# Convert flower to grayscale and threshold
+gray = cv2.cvtColor(flower, cv2.COLOR_BGR2GRAY)
+_, mask = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY_INV)
+
+# Create inverted mask
+mask_inv = cv2.bitwise_not(mask)
+
+# Use mask to extract flower and background
+fg = cv2.bitwise_and(flower, flower, mask=mask)
+bg = cv2.bitwise_and(bee, bee, mask=mask_inv)
+
+# Combine foreground and background
+result = cv2.add(fg, bg)
+
+cv2.imshow('Result', result)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+-------
+3.
+import cv2
+import numpy as np
+
+def random_center_crop(image, min_crop_ratio, max_crop_ratio):
+    h, w = image.shape[:2]
+    
+    crop_ratio = np.random.uniform(min_crop_ratio, max_crop_ratio)
+    
+    crop_h = int(h * crop_ratio)
+    crop_w = int(w * crop_ratio)
+    
+    start_x = (w - crop_w) // 2
+    start_y = (h - crop_h) // 2
+    
+    cropped = image[start_y:start_y+crop_h, start_x:start_x+crop_w]
+    
+    return cropped
+
+# Example usage:
+img = cv2.imread('lena.jfif')
+cropped = random_center_crop(img, 0.5, 0.8)
+
+cv2.imshow('Cropped', cropped)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
